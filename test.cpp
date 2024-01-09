@@ -49,7 +49,7 @@ Vector2 rotateVector(Vector2 input, float angle){
 
 }
 void controlPlayerInput(){
-	double rotationconst =.15;
+	double rotationconst =.1;
 	if(IsKeyDown(KEY_RIGHT)) 
 	{
 	  Vector2 newDir = rotateVector({user.dirX,user.dirY},rotationconst);	
@@ -81,7 +81,10 @@ void controlPlayerInput(){
 	}
 }
 void drawRay(){ //example of drawing a singular ray using DDA algorithim.
-	double cameraX = 0;
+	int rays=50;
+	for(int iter=0;iter<rays;iter++)
+	{
+	double cameraX = 2*iter/double(rays) -1;
 	double rayX = user.dirX +user.planeX *cameraX;
 	double rayY = user.dirY +user.planeY *cameraX;
 	DrawLineEx({user.xPos,user.yPos},{user.xPos+rayX*30,user.yPos+rayY*30},3,GREEN);
@@ -95,9 +98,8 @@ void drawRay(){ //example of drawing a singular ray using DDA algorithim.
 	int yStep; //indicates wether x step and y step will be in the positive or negative direction. Essentially describes the quadrant in cartesian coordinates that the line is moving towards.
 	int mapX = int(user.xPos/20);//20;
 	int mapY = int(user.yPos/20);///20;
-	//mapY+=1;
-	double xxPos = (double) (int(user.xPos)%20)/20.0;
-	double yyPos = (double) (int(user.yPos)%20)/20.0;
+	double xxPos = (double) ((user.xPos))/20.0;
+	double yyPos = (double) ((user.yPos))/20.0;
 
 	double interiorYdist;
 	double interiorXdist;
@@ -105,29 +107,27 @@ void drawRay(){ //example of drawing a singular ray using DDA algorithim.
 	if(rayX < 0)
 	{
 		xStep=-1;
-		interiorXdist =(user.xPos-mapX) * changeInXdist; //- user.xPos;
+		interiorXdist =(xxPos-mapX) * changeInXdist; //- user.xPos;
 	}
 	if(rayX >= 0)
 	{
 		xStep=1;
-		interiorXdist = (mapX- user.xPos+1.0)* changeInXdist;
+		interiorXdist = (mapX- xxPos+1.0)* changeInXdist;
 
 	}
 	if(rayY >= 0)
 	{
 		yStep=1;
-		interiorYdist = (mapY-user.yPos +1.0) *  changeInYdist;
+		interiorYdist = (mapY-yyPos +1.0) *  changeInYdist;
 
 	}
 	if(rayY < 0)
 	{
 		yStep=-1;
-		interiorYdist =   changeInYdist* (user.yPos-mapY); //- user.yPos;
+		interiorYdist =   changeInYdist* (yyPos-mapY); //- user.yPos;
 
 	}
 	int count=0;
-	std::cout << "intXdist " << interiorXdist << '\n';
-	std::cout << "intYdist " << interiorYdist << '\n';
 	while(hit == 0 && count <250)
 	{
 		if(interiorXdist > interiorYdist)
@@ -143,11 +143,12 @@ void drawRay(){ //example of drawing a singular ray using DDA algorithim.
 			interiorXdist += changeInXdist;
 		}
 		count++;
-		std::cout<< "mapX: "<< mapX<< "mapY: " << mapY<<'\n';
 		if(map[mapX][mapY] >0){hit=1;map[mapX][mapY]=2;}
 	}
-	std::cout<< "mapX: " << mapX << "   " << "mapY: " << mapY;	
-
+	interiorXdist*=20;
+	interiorYdist*=20;
+	DrawLineV({user.xPos,user.yPos},{user.xPos+(interiorXdist*rayX)+(-xStep*20),user.yPos+(interiorYdist*rayY)+(-yStep*20)},BLACK);
+	}
 }
 void updateUser(){
 				controlPlayerInput();
@@ -220,8 +221,10 @@ int main(void)
         BeginDrawing();
             ClearBackground(RAYWHITE);
 				drawMap();
+				createBoundary();
 				DrawFPS(0,0);
 				updateUser();
+				
         EndDrawing();
     }
 
