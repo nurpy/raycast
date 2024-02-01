@@ -1,4 +1,5 @@
 #include "raylib.h"
+//#include <ifstream>
 #include <cmath>
 #include <iostream>
 #include <vector>
@@ -8,17 +9,22 @@ struct player{
 	float dirX,dirY,planeX,planeY;
 	float dir;
 	float angle;
+	int pitch;
 
 }player;
 
-struct player user;
-std::vector<std::vector<int>> map(20,std::vector<int>(20));
 const int tilesize= 20;
+struct player user;
+std::vector<std::vector<int>> map(tilesize,std::vector<int>(tilesize));
+
+int keymap[3][3] = {{1,0,1},
+	{0,1,0},
+	{1,0,1}};
 
 void populateMap(){
 
-	for(int i=0;i<20;i+=1){
-		for(int j=0;j<20;j+=1){
+	for(int i=0;i<tilesize;i+=1){
+		for(int j=0;j<tilesize;j+=1){
 			map[i][j]=0;
 		}
 	}
@@ -27,11 +33,12 @@ void populateMap(){
 }
 
 void drawMap(){
-	for(int i=0;i<20;i+=1){
-		for(int j=0;j<20;j+=1){
+	for(int i=0;i<tilesize;i+=1){
+		for(int j=0;j<tilesize;j+=1){
 			if(map[i][j] ==0){DrawRectangleLines(i*20,j*20,20,20,MAROON);}
 			if(map[i][j] ==1){DrawRectangle(i*20,j*20,20,20,MAROON);}	
 			if(map[i][j] ==2){DrawRectangle(i*20,j*20,20,20,GREEN);}
+			if(map[i][j] == 3) {DrawRectangle(i*20,j*20,20,20,GREEN);}
 		}
 	}
 }
@@ -56,27 +63,33 @@ void controlPlayerInput(){
 
 	}
 
+	if(IsKeyDown(KEY_A)){
+	user.pitch+=18;
+	}
+	if(IsKeyDown(KEY_Z)){
+	user.pitch-=18;
+	}
 
 	if(IsKeyDown(KEY_RIGHT)) 
 	{
-	  Vector2 newDir = rotateVector({user.dirX,user.dirY},rotationconst);	
-	  Vector2 newPlaneDir =  rotateVector({user.planeX,user.planeY},rotationconst);
-	  user.dirX=newDir.x;
-	  user.dirY=newDir.y;
-	  user.planeX=newPlaneDir.x;
-	  user.planeY=newPlaneDir.y;
-	  user.angle+=rotationconst;
-	}	
-
-	if(IsKeyDown(KEY_LEFT))
-  	{
 	  Vector2 newDir = rotateVector({user.dirX,user.dirY},-rotationconst);	
 	  Vector2 newPlaneDir =  rotateVector({user.planeX,user.planeY},-rotationconst);
 	  user.dirX=newDir.x;
 	  user.dirY=newDir.y;
 	  user.planeX=newPlaneDir.x;
-	  user.planeY=newPlaneDir.y;	
+	  user.planeY=newPlaneDir.y;
 	  user.angle-=rotationconst;
+	}	
+
+	if(IsKeyDown(KEY_LEFT))
+  	{
+	  Vector2 newDir = rotateVector({user.dirX,user.dirY},rotationconst);	
+	  Vector2 newPlaneDir =  rotateVector({user.planeX,user.planeY},rotationconst);
+	  user.dirX=newDir.x;
+	  user.dirY=newDir.y;
+	  user.planeX=newPlaneDir.x;
+	  user.planeY=newPlaneDir.y;	
+	  user.angle+=rotationconst;
 	}
 	if(IsKeyDown(KEY_DOWN))
   	{
@@ -89,6 +102,22 @@ void controlPlayerInput(){
 	  	user.xPos += 10*user.dirX;
 	}
 }
+void drawImage(int xStart,int drawStart,int xEnd,int drawEnd){
+	int step= (drawEnd-drawStart)/3;
+
+	for(int i=drawStart; i<drawEnd;i+=step)
+	{
+		
+		DrawRectangleV({},{},BLACK);
+
+
+
+	}
+
+
+
+
+}
 void drawscreen(float perpwalldist,int ray, float NumberofRays,int axislineHit){
 		int width =400;
 		int maxheight =400;
@@ -96,15 +125,19 @@ void drawscreen(float perpwalldist,int ray, float NumberofRays,int axislineHit){
 		ray++;
 		int xdistend = (ray/NumberofRays)*width;	
 
-		int lineHeight = (int)( maxheight/ (perpwalldist/20));
+		int lineHeight = (int)( maxheight/ (perpwalldist/tilesize));
       //calculate lowest and highest pixel to fill in current stripe
-      int drawStart = -lineHeight / 2 + maxheight / 2;
-      int drawEnd = lineHeight / 2 + maxheight / 2;
+      int drawStart = -lineHeight / 2 + maxheight / 2 +user.pitch;
+      int drawEnd = lineHeight / 2 + maxheight / 2 +user.pitch;
       if(drawStart < 0){drawStart = 0;}
       if(drawEnd >= maxheight){drawEnd = maxheight - 1;}
 		DrawRectangleV({width+xdiststart,0},{xdistend-xdiststart,drawStart},BLUE);
-		DrawRectangleV({width+xdiststart,drawEnd},{xdistend-xdiststart,drawStart},GREEN);
 
+		int additive = drawStart + (drawEnd-drawStart);
+		int tempg = 400-additive;
+		DrawRectangleV({width+xdiststart,drawStart},{xdistend-xdiststart,drawEnd+tempg},GREEN);
+
+		//drawImage(width+xdiststart,drawStart,xdistend-xdiststart,drawEnd-drawStart);
 		if(axislineHit == 0){
 		DrawRectangleV({width+xdiststart,drawStart},{xdistend-xdiststart,drawEnd-drawStart},BROWN);
 		}
@@ -113,13 +146,13 @@ void drawscreen(float perpwalldist,int ray, float NumberofRays,int axislineHit){
 		}
 }
 void drawRay(){ //example of drawing a singular ray using DDA algorithim.
-	int rays=300;
+	int rays=60;
 	for(int iter=0;iter<rays;iter++)
 	{
-	double cameraX = 2*iter/double(rays) -1;
+	double cameraX = (2*iter/double(rays))-1;
+
 	double rayX = user.dirX +user.planeX *cameraX;
 	double rayY = user.dirY +user.planeY *cameraX;
-	DrawLineEx({user.xPos,user.yPos},{user.xPos+rayX*30,user.yPos+rayY*30},3,GREEN);
 	//DDA in future will try Beseneham
 	// heavy influence from lodev.org
 
@@ -194,14 +227,16 @@ void drawRay(){ //example of drawing a singular ray using DDA algorithim.
 		float ydist= interiorYdist*sin(user.angle);
 		Vector2 newvect = rotateVector({xdist,ydist},(angle-user.angle));
 		DrawLineEx({user.xPos,user.yPos},{user.xPos+newvect.x ,user.yPos+newvect.y},1,ORANGE);
-		drawscreen(interiorYdist,iter,rays,axisLineHit);
+		float xdist2=interiorYdist*cos(angle-user.angle);
+		drawscreen(xdist2,iter,rays,axisLineHit);
 	}
 	if(axisLineHit ==1){
 		float xdist=interiorXdist*cos(user.angle);
 		float ydist= interiorXdist*sin(user.angle);
 		Vector2 newvect = rotateVector({xdist,ydist},(angle-user.angle));
 		DrawLineEx({user.xPos,user.yPos},{user.xPos+newvect.x ,user.yPos+newvect.y},1,BROWN);
-		drawscreen(interiorXdist,iter,rays,axisLineHit);
+		float xdist2=std::abs(interiorXdist*cos(angle-user.angle));
+		drawscreen(xdist2,iter,rays,axisLineHit);
 	}
 
 	}
@@ -250,6 +285,18 @@ void checkBoudaries(){
 
 
 }
+void readFromFile(){
+/*	ifstream file;
+	
+	assert(file.is_open();
+	while(getLine(
+
+
+*/
+
+	}
+
+
 
 int main(void)
 {
@@ -259,7 +306,7 @@ int main(void)
 	 user.dirX = -1;
 	 user.dirY = 0; // direction player is facing, naturally should be orthog to plane
 	 user.planeX = 0;
-	 user.planeY = 1;
+	 user.planeY = 2.0/3.0;
 	 user.angle=PI;	
 
 
@@ -269,6 +316,8 @@ int main(void)
 	 populateMap();
 	 map[5][5]=1;
 	 map[5][6]=1;
+	 map[7][15]=1;
+	 map[8][13]=1;
 	 createBoundary();
 //	 drawMap();
 //	 drawRay();
