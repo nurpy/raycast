@@ -17,9 +17,9 @@ const int tilesize= 20;
 struct player user;
 std::vector<std::vector<int>> map(tilesize,std::vector<int>(tilesize));
 
-int keymap[3][3] = {{1,0,1},
-	{0,1,0},
-	{1,0,1}};
+int keymap[3][3] = {{1,1,1},
+	{1,0,1},
+	{1,1,1}};
 
 void populateMap(){
 
@@ -102,15 +102,38 @@ void controlPlayerInput(){
 	  	user.xPos += 10*user.dirX;
 	}
 }
-void drawImage(int xStart,int drawStart,int xEnd,int drawEnd){
-	int step= (drawEnd-drawStart)/3;
+void drawImage(int xStart,int drawStart,int xEnd,int drawEnd,float distToWall){
+	float step= (drawEnd-drawStart)/3.0; // size of image
+	int colorval = int(distToWall * 3.0); //size of image												
+	int xCordOfColorMat=0;
 
-	for(int i=drawStart; i<drawEnd;i+=step)
+
+	
+
+
+	for(float i=drawStart; i<drawEnd;i+=step)
 	{
+		if(keymap[colorval][xCordOfColorMat] == 0){
+		if(xCordOfColorMat ==3){
+			break;
+		}
+		DrawRectangleV({xStart,i},{xEnd,step},BLACK);
+
+		}
+		if(keymap[colorval][xCordOfColorMat] == 1){
+			if(xCordOfColorMat ==3){
+				break;
+			}
+		DrawRectangleV({xStart,i},{xEnd,step},RED);
+		}
+
+
+		xCordOfColorMat++;
 		
-		DrawRectangleV({},{},BLACK);
-
-
+		char* msg = (char*) malloc(1+sizeof(double)*2);
+		sprintf(msg,"%lf %lf",distToWall, distToWall);
+		DrawText(msg,500,200,25,PURPLE);
+		free(msg);
 
 	}
 
@@ -118,7 +141,7 @@ void drawImage(int xStart,int drawStart,int xEnd,int drawEnd){
 
 
 }
-void drawscreen(float perpwalldist,int ray, float NumberofRays,int axislineHit){
+void drawscreen(float perpwalldist,int ray, float NumberofRays,int axislineHit,float distToWall){
 		int width =400;
 		int maxheight =400;
 		int xdiststart = (ray/NumberofRays)*width;
@@ -137,16 +160,18 @@ void drawscreen(float perpwalldist,int ray, float NumberofRays,int axislineHit){
 		int tempg = 400-additive;
 		DrawRectangleV({width+xdiststart,drawStart},{xdistend-xdiststart,drawEnd+tempg},GREEN);
 
-		//drawImage(width+xdiststart,drawStart,xdistend-xdiststart,drawEnd-drawStart);
+		drawImage(width+xdiststart,drawStart,xdistend-xdiststart,drawEnd,distToWall);
+/*		
 		if(axislineHit == 0){
 		DrawRectangleV({width+xdiststart,drawStart},{xdistend-xdiststart,drawEnd-drawStart},BROWN);
 		}
 		if(axislineHit == 1){
 		DrawRectangleV({width+xdiststart,drawStart},{xdistend-xdiststart,drawEnd-drawStart},DARKBROWN);
 		}
+*/		
 }
 void drawRay(){ //example of drawing a singular ray using DDA algorithim.
-	int rays=60;
+	int rays=100;
 	for(int iter=0;iter<rays;iter++)
 	{
 	double cameraX = (2*iter/double(rays))-1;
@@ -228,7 +253,12 @@ void drawRay(){ //example of drawing a singular ray using DDA algorithim.
 		Vector2 newvect = rotateVector({xdist,ydist},(angle-user.angle));
 		DrawLineEx({user.xPos,user.yPos},{user.xPos+newvect.x ,user.yPos+newvect.y},1,ORANGE);
 		float xdist2=interiorYdist*cos(angle-user.angle);
-		drawscreen(xdist2,iter,rays,axisLineHit);
+
+		float distToWall =((user.xPos+newvect.x)/20.0);
+		int tempint = mapX;
+		distToWall=distToWall-tempint;
+		distToWall = std::abs(distToWall);
+		drawscreen(xdist2,iter,rays,axisLineHit,distToWall);
 	}
 	if(axisLineHit ==1){
 		float xdist=interiorXdist*cos(user.angle);
@@ -236,7 +266,12 @@ void drawRay(){ //example of drawing a singular ray using DDA algorithim.
 		Vector2 newvect = rotateVector({xdist,ydist},(angle-user.angle));
 		DrawLineEx({user.xPos,user.yPos},{user.xPos+newvect.x ,user.yPos+newvect.y},1,BROWN);
 		float xdist2=std::abs(interiorXdist*cos(angle-user.angle));
-		drawscreen(xdist2,iter,rays,axisLineHit);
+
+		float distToWall = ((user.yPos+newvect.y)/20.0);
+		int tempint = mapY;
+		distToWall=distToWall-tempint;
+		distToWall = std::abs(distToWall);
+		drawscreen(xdist2,iter,rays,axisLineHit,distToWall);
 	}
 
 	}
