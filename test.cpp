@@ -17,9 +17,22 @@ const int tilesize= 20;
 struct player user;
 std::vector<std::vector<int>> map(tilesize,std::vector<int>(tilesize));
 
-int keymap[3][3] = {{1,1,1},
-	{1,0,1},
-	{1,1,1}};
+int keymap[15][15] = {{1,1,1,1,1,1,0,1,0,1,0,1,1,1,1},
+					  		{1,1,1,1,1,1,0,1,1,1,1,1,1,1,1},
+					  		{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+					  		{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+					  		{1,1,1,1,1,0,0,1,1,1,0,0,1,1,1},
+					  		{0,1,1,1,1,1,0,1,1,1,0,1,1,1,0},
+					  		{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+					  		{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+					  		{0,1,1,1,1,1,1,1,1,1,1,1,1,1,0},
+					  		{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+					  		{1,1,1,1,1,0,0,0,0,0,0,1,1,1,1},
+					  		{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+					  		{1,1,1,1,1,0,1,1,1,1,1,0,1,1,1},
+					  		{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+					  		{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}};
+						
 
 void populateMap(){
 
@@ -93,53 +106,97 @@ void controlPlayerInput(){
 	}
 	if(IsKeyDown(KEY_DOWN))
   	{
-		user.yPos-= 10* user.dirY;
-	  	user.xPos-=10* user.dirX;
+		user.yPos-= 5* user.dirY;
+	  	user.xPos-=5* user.dirX;
 	}
 	if(IsKeyDown(KEY_UP))
   	{
-		user.yPos+= 10*user.dirY;
-	  	user.xPos += 10*user.dirX;
+		user.yPos+= 5*user.dirY;
+	  	user.xPos += 5*user.dirX;
 	}
 }
-void drawImage(int xStart,int drawStart,int xEnd,int drawEnd,float distToWall){
-	float step= (drawEnd-drawStart)/3.0; // size of image
-	int colorval = int(distToWall * 3.0); //size of image												
-	int xCordOfColorMat=0;
+void drawImage(int xStart,int drawStart,int xEnd,int drawEnd,float distToWall,float startingTexture){
+/*	
+	float xCordOfColorMatend;
+	float step;
+	int colorval;
+	int xCordOfColorMat;
+	*/
+//	if(startingTexture > 0.0){
+	float xCordOfColorMatend;
+	
+	xCordOfColorMatend=(1.0- std::abs(startingTexture))*15;
+	if(startingTexture <0.0)
+	{
+		xCordOfColorMatend=(std::abs(startingTexture))*15;
 
+	}
+	xCordOfColorMatend=xCordOfColorMatend;
+	float step= (drawEnd-drawStart)/15.0; // size of image
+	int colorval = int(distToWall * 15); //size of image												
+
+	int xCordOfColorMat = 0;
+	if(startingTexture <0.0){
+		xCordOfColorMat=xCordOfColorMatend;
+		xCordOfColorMatend = 15.0;
+	}
+//	}
+/*	
+	else if(startingTexture < 0.0){
+	
+	float xCordOfColorMatend=(1.0-(-startingTexture))*15;
+	xCordOfColorMatend=xCordOfColorMatend;
+	float step= (drawEnd-drawStart)/15.0; // size of image
+	int colorval = int(distToWall * 15); //size of image												
+	int xCordOfColorMat = xCordOfColorMatend;
+	xCordOfColorMatend=15.0;
+	}
+	
+	/*else{
+	float xCordOfColorMatend=15.0;
+	xCordOfColorMatend=xCordOfColorMatend;
+	float step= (drawEnd-drawStart)/15.0; // size of image
+	int colorval = int(distToWall * 15); //size of image												
+	int xCordOfColorMat = 0;
+
+	}*/
 
 	
-
-
-	for(float i=drawStart; i<drawEnd;i+=step)
+//	char* msg = (char*) malloc(1+sizeof(float)*1+ sizeof(int));
+//	sprintf(msg,"%d %lf",xCordOfColorMat, startingTexture);
+//	DrawText(msg,500,200,25,PURPLE);
+//	free(msg);
+	int iterations=0;
+	for(float i=drawStart; i<drawEnd && xCordOfColorMat != xCordOfColorMatend ;i+=step)
 	{
 		if(keymap[colorval][xCordOfColorMat] == 0){
-		if(xCordOfColorMat ==3){
+		if(xCordOfColorMat ==15){
 			break;
 		}
 		DrawRectangleV({xStart,i},{xEnd,step},BLACK);
 
 		}
 		if(keymap[colorval][xCordOfColorMat] == 1){
-			if(xCordOfColorMat ==3){
+			if(xCordOfColorMat ==15){
 				break;
 			}
 		DrawRectangleV({xStart,i},{xEnd,step},RED);
 		}
 
-
+		iterations++;
 		xCordOfColorMat++;
 		
-		char* msg = (char*) malloc(1+sizeof(double)*2);
-		sprintf(msg,"%lf %lf",distToWall, distToWall);
-		DrawText(msg,500,200,25,PURPLE);
-		free(msg);
+	//	char* msg = (char*) malloc(1+sizeof(float)*1+ sizeof(int));
+	//	sprintf(msg,"%d %lf",xCordOfColorMat, startingTexture);
+	//	DrawText(msg,500,200,25,PURPLE);
+	//	free(msg);
+	
 
 	}
 
 
 
-
+	
 }
 void drawscreen(float perpwalldist,int ray, float NumberofRays,int axislineHit,float distToWall){
 		int width =400;
@@ -152,15 +209,34 @@ void drawscreen(float perpwalldist,int ray, float NumberofRays,int axislineHit,f
       //calculate lowest and highest pixel to fill in current stripe
       int drawStart = -lineHeight / 2 + maxheight / 2 +user.pitch;
       int drawEnd = lineHeight / 2 + maxheight / 2 +user.pitch;
-      if(drawStart < 0){drawStart = 0;}
-      if(drawEnd >= maxheight){drawEnd = maxheight - 1;}
+
+		int drawWallEnd=drawEnd;
+		float drawlen= drawEnd-drawStart;
+		float drawWallOffset = 0.0;
+
+		//get a ratio of the length of the rectangle and how much the rectangle sticks out
+      if(drawStart < 0)
+		{
+
+			int lineOutside = (drawStart)/2.0;
+			drawWallOffset =  (lineOutside/drawlen);
+
+		  	drawStart = 0;
+		}
+      if(drawEnd >= maxheight)
+		{
+			int lineOutside = (drawEnd-maxheight)/2.0;
+			drawWallOffset =  (lineOutside/drawlen);
+			drawEnd = maxheight - 1;
+		}
+
 		DrawRectangleV({width+xdiststart,0},{xdistend-xdiststart,drawStart},BLUE);
 
 		int additive = drawStart + (drawEnd-drawStart);
 		int tempg = 400-additive;
 		DrawRectangleV({width+xdiststart,drawStart},{xdistend-xdiststart,drawEnd+tempg},GREEN);
 
-		drawImage(width+xdiststart,drawStart,xdistend-xdiststart,drawEnd,distToWall);
+		drawImage(width+xdiststart,drawStart,xdistend-xdiststart,drawWallEnd,distToWall,drawWallOffset);
 /*		
 		if(axislineHit == 0){
 		DrawRectangleV({width+xdiststart,drawStart},{xdistend-xdiststart,drawEnd-drawStart},BROWN);
@@ -171,7 +247,7 @@ void drawscreen(float perpwalldist,int ray, float NumberofRays,int axislineHit,f
 */		
 }
 void drawRay(){ //example of drawing a singular ray using DDA algorithim.
-	int rays=100;
+	int rays=200;
 	for(int iter=0;iter<rays;iter++)
 	{
 	double cameraX = (2*iter/double(rays))-1;
@@ -244,6 +320,7 @@ void drawRay(){ //example of drawing a singular ray using DDA algorithim.
 			map[mapX][mapY]=2;
 		}
 	}
+	
 	interiorXdist*=20;
 	interiorYdist*=20;
 	double angle = atan2(rayY,rayX);
@@ -251,7 +328,7 @@ void drawRay(){ //example of drawing a singular ray using DDA algorithim.
 		float xdist=interiorYdist*cos(user.angle);
 		float ydist= interiorYdist*sin(user.angle);
 		Vector2 newvect = rotateVector({xdist,ydist},(angle-user.angle));
-		DrawLineEx({user.xPos,user.yPos},{user.xPos+newvect.x ,user.yPos+newvect.y},1,ORANGE);
+		//DrawLineEx({user.xPos,user.yPos},{user.xPos+newvect.x ,user.yPos+newvect.y},1,ORANGE);
 		float xdist2=interiorYdist*cos(angle-user.angle);
 
 		float distToWall =((user.xPos+newvect.x)/20.0);
@@ -264,7 +341,7 @@ void drawRay(){ //example of drawing a singular ray using DDA algorithim.
 		float xdist=interiorXdist*cos(user.angle);
 		float ydist= interiorXdist*sin(user.angle);
 		Vector2 newvect = rotateVector({xdist,ydist},(angle-user.angle));
-		DrawLineEx({user.xPos,user.yPos},{user.xPos+newvect.x ,user.yPos+newvect.y},1,BROWN);
+		//DrawLineEx({user.xPos,user.yPos},{user.xPos+newvect.x ,user.yPos+newvect.y},1,BROWN);
 		float xdist2=std::abs(interiorXdist*cos(angle-user.angle));
 
 		float distToWall = ((user.yPos+newvect.y)/20.0);
