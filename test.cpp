@@ -116,13 +116,6 @@ void controlPlayerInput(){
 	}
 }
 void drawImage(int xStart,int drawStart,int xEnd,int drawEnd,float distToWall,float startingTexture){
-/*	
-	float xCordOfColorMatend;
-	float step;
-	int colorval;
-	int xCordOfColorMat;
-	*/
-//	if(startingTexture > 0.0){
 	float xCordOfColorMatend;
 	
 	xCordOfColorMatend=(1.0- std::abs(startingTexture))*15;
@@ -131,43 +124,16 @@ void drawImage(int xStart,int drawStart,int xEnd,int drawEnd,float distToWall,fl
 		xCordOfColorMatend=(std::abs(startingTexture))*15;
 
 	}
-	xCordOfColorMatend=xCordOfColorMatend;
 	float step= (drawEnd-drawStart)/15.0; // size of image
 	int colorval = int(distToWall * 15); //size of image												
 
 	int xCordOfColorMat = 0;
 	if(startingTexture <0.0){
-		xCordOfColorMat=xCordOfColorMatend;
-		xCordOfColorMatend = 15.0;
-	}
-//	}
-/*	
-	else if(startingTexture < 0.0){
-	
-	float xCordOfColorMatend=(1.0-(-startingTexture))*15;
-	xCordOfColorMatend=xCordOfColorMatend;
-	float step= (drawEnd-drawStart)/15.0; // size of image
-	int colorval = int(distToWall * 15); //size of image												
-	int xCordOfColorMat = xCordOfColorMatend;
-	xCordOfColorMatend=15.0;
+		xCordOfColorMat=0;
+		xCordOfColorMatend = 15;
 	}
 	
-	/*else{
-	float xCordOfColorMatend=15.0;
-	xCordOfColorMatend=xCordOfColorMatend;
-	float step= (drawEnd-drawStart)/15.0; // size of image
-	int colorval = int(distToWall * 15); //size of image												
-	int xCordOfColorMat = 0;
-
-	}*/
-
-	
-//	char* msg = (char*) malloc(1+sizeof(float)*1+ sizeof(int));
-//	sprintf(msg,"%d %lf",xCordOfColorMat, startingTexture);
-//	DrawText(msg,500,200,25,PURPLE);
-//	free(msg);
-	int iterations=0;
-	for(float i=drawStart; i<drawEnd && xCordOfColorMat != xCordOfColorMatend ;i+=step)
+	for(float i=drawStart; i<drawEnd && xCordOfColorMat < xCordOfColorMatend ;i+=step)
 	{
 		if(keymap[colorval][xCordOfColorMat] == 0){
 		if(xCordOfColorMat ==15){
@@ -183,15 +149,7 @@ void drawImage(int xStart,int drawStart,int xEnd,int drawEnd,float distToWall,fl
 		DrawRectangleV({xStart,i},{xEnd,step},RED);
 		}
 
-		iterations++;
 		xCordOfColorMat++;
-		
-	//	char* msg = (char*) malloc(1+sizeof(float)*1+ sizeof(int));
-	//	sprintf(msg,"%d %lf",xCordOfColorMat, startingTexture);
-	//	DrawText(msg,500,200,25,PURPLE);
-	//	free(msg);
-	
-
 	}
 
 
@@ -207,10 +165,11 @@ void drawscreen(float perpwalldist,int ray, float NumberofRays,int axislineHit,f
 
 		int lineHeight = (int)( maxheight/ (perpwalldist/tilesize));
       //calculate lowest and highest pixel to fill in current stripe
-      int drawStart = -lineHeight / 2 + maxheight / 2 +user.pitch;
-      int drawEnd = lineHeight / 2 + maxheight / 2 +user.pitch;
+      int drawStart =( -lineHeight / 2) + (maxheight / 2) +user.pitch;
+      int drawEnd = (lineHeight / 2) + (maxheight / 2) +user.pitch;
 
 		int drawWallEnd=drawEnd;
+		int drawWallStart=drawStart;
 		float drawlen= drawEnd-drawStart;
 		float drawWallOffset = 0.0;
 
@@ -218,7 +177,7 @@ void drawscreen(float perpwalldist,int ray, float NumberofRays,int axislineHit,f
       if(drawStart < 0)
 		{
 
-			int lineOutside = (drawStart)/2.0;
+			int lineOutside = (drawStart/2.0);
 			drawWallOffset =  (lineOutside/drawlen);
 
 		  	drawStart = 0;
@@ -236,7 +195,7 @@ void drawscreen(float perpwalldist,int ray, float NumberofRays,int axislineHit,f
 		int tempg = 400-additive;
 		DrawRectangleV({width+xdiststart,drawStart},{xdistend-xdiststart,drawEnd+tempg},GREEN);
 
-		drawImage(width+xdiststart,drawStart,xdistend-xdiststart,drawWallEnd,distToWall,drawWallOffset);
+		drawImage(width+xdiststart,drawWallStart,xdistend-xdiststart,drawWallEnd,distToWall,drawWallOffset);
 /*		
 		if(axislineHit == 0){
 		DrawRectangleV({width+xdiststart,drawStart},{xdistend-xdiststart,drawEnd-drawStart},BROWN);
@@ -247,7 +206,7 @@ void drawscreen(float perpwalldist,int ray, float NumberofRays,int axislineHit,f
 */		
 }
 void drawRay(){ //example of drawing a singular ray using DDA algorithim.
-	int rays=200;
+	int rays=100;
 	for(int iter=0;iter<rays;iter++)
 	{
 	double cameraX = (2*iter/double(rays))-1;
